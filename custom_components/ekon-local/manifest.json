@@ -1,0 +1,8 @@
+{
+  "domain": "ekon-local",
+  "name": "Ekon-local Wifi A/C Componenet",
+  "documentation": "https://github.com/hllhll/HomeAssistant-ekon-local",
+  "dependencies": [],
+  "codeowners": ["@hllhll"],
+  "requirements": ["git+https://github.com/hllhll/pyekonlib@master#pyekonlib==0.1f"]
+}
