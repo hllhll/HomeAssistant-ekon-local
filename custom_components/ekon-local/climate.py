@@ -241,7 +241,10 @@ class EkonLocalClimate(ClimateEntity):
 
     @property
     def hvac_mode(self):
-        mode = MAP_MODE_EKONLIB_TO_HASS[self._current_state.mode]
+        if self._current_state.onoff==False:
+            mode = HVAC_MODE_OFF
+        else: 
+            mode = MAP_MODE_EKONLIB_TO_HASS[self._current_state.mode]
         _LOGGER.info('hvac_mode(): ' + str(mode))
         return mode
 
