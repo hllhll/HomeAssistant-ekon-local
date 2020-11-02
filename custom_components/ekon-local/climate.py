@@ -113,7 +113,6 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     udp_server_ip = config.get(CONF_UDP_SERVER_ADDR)
     udp_server_port = config.get(CONF_UDP_SERVER_PORT)
     if dev_addr is not None and dev_addr!='':
-        # def SetDeviceUDPServer(deviceAddr, serverAddr, serverPort):
         _LOGGER.info ("Migrated Ekon device")
         migrate_lambda = lambda: pyekonlib.Migration.SetDeviceUDPServer(dev_addr, udp_server_ip, udp_server_port)
         result = await hass.async_add_executor_job(migrate_lambda)
@@ -155,17 +154,22 @@ class HAEkonLocalClimateController():
 
     @asyncio.coroutine
     async def on_hvac_connected(self, deviceSession, hvacState):
-        _LOGGER.info("Ekon device connected")
-        newdev = EkonLocalClimate(self, self.hass, hvacState, self._name, deviceSession)
-        self._devices += [newdev]
-        self._async_add_devices([newdev])
-        _LOGGER.info("After - Ekon device connected, device added to hass")
+        if len(self._devices)==0:
+            _LOGGER.info("Ekon device connected")
+            newdev = EkonLocalClimate(self, self.hass, hvacState, self._name, deviceSession)
+            self._devices += [newdev]
+            self._async_add_devices([newdev])
+            _LOGGER.info("After - Ekon device connected, device added to hass")
+        else:
+            _LOGGER.info("Ekon device re-connected")
+            self._devices[0].timed_out = False
+            await self._devices[0].async_schedule_update_ha_state()
 
     @asyncio.coroutine
     async def on_hvac_timeout(self, deviceSession):
-        #TODO: MAKE HVAC UNAVIALALBE
         _LOGGER.info("HVAC Timed-out")
-        pass
+        self._devices[0].timed_out = True
+        await self._devices[0].async_schedule_update_ha_state()
 
     @asyncio.coroutine
     async def on_hvac_data(self, deviceSession, newstate):
@@ -186,6 +190,7 @@ class EkonLocalClimate(ClimateEntity):
         self._name = name
         self._current_state = state
         self._session = deviceSession
+        self.timed_out = False
 
     BLHA = 0
     async def update_state(self, newstate):
@@ -194,6 +199,10 @@ class EkonLocalClimate(ClimateEntity):
         EkonLocalClimate.BLHA += 1
         if EkonLocalClimate.BLHA > 1:
             self.async_schedule_update_ha_state()
+
+    @property
+    def available(self):
+        return not self.timed_out
 
     @property
     def should_poll(self):
