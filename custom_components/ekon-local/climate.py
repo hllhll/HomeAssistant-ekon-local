@@ -115,7 +115,9 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     if dev_addr is not None and dev_addr!='':
         # def SetDeviceUDPServer(deviceAddr, serverAddr, serverPort):
         _LOGGER.info ("Migrated Ekon device")
-        if pyekonlib.Migration.SetDeviceUDPServer(dev_addr, udp_server_ip, udp_server_port):
+        migrate_lambda = lambda: pyekonlib.Migration.SetDeviceUDPServer(dev_addr, udp_server_ip, udp_server_port)
+        result = await hass.async_add_executor_job(migrate_lambda)
+        if result:
             _LOGGER.info ("Migrated Ekon device %s to server %s:%d" % (dev_addr,udp_server_ip,udp_server_port))
         else:
             _LOGGER.error ("Error migrating device %s" % dev_addr)
