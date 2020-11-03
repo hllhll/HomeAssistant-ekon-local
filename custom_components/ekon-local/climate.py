@@ -109,20 +109,22 @@ EKON_VALUE_FAN_HIGH = 3
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     _LOGGER.info('Setting up Ekon-local climate platform')
 
+    _LOGGER.info('Creating Ekon-local climate controller')
+    controller = HAEkonLocalClimateController(hass, config, async_add_devices)
+    _LOGGER.debug('Starting Ekon-local server')
+    await controller.start()
+
     dev_addr = config.get(CONF_DEVICE_ADDR)
     udp_server_ip = config.get(CONF_UDP_SERVER_ADDR)
     udp_server_port = config.get(CONF_UDP_SERVER_PORT)
     if dev_addr is not None and dev_addr!='':
         _LOGGER.info ("Migrated Ekon device")
-        migrate_lambda = lambda: pyekonlib.Migration.SetDeviceUDPServer(dev_addr, udp_server_ip, udp_server_port)
-        result = await hass.async_add_executor_job(migrate_lambda)
+        result = await hass.async_add_executor_job(context.migrate)
         if result:
             _LOGGER.info ("Migrated Ekon device %s to server %s:%d" % (dev_addr,udp_server_ip,udp_server_port))
         else:
             _LOGGER.error ("Error migrating device %s" % dev_addr)
-    _LOGGER.info('Creating Ekon-local climate controller')
-    controller = HAEkonLocalClimateController(hass, config, async_add_devices)
-    await controller.start()
+    
     _LOGGER.info('Finished setting up Ekon-local climate platform')
 
 
@@ -163,13 +165,16 @@ class HAEkonLocalClimateController():
         else:
             _LOGGER.info("Ekon device re-connected")
             self._devices[0].timed_out = False
-            await self._devices[0].async_schedule_update_ha_state()
+            self._devices[0].async_schedule_update_ha_state()
 
     @asyncio.coroutine
     async def on_hvac_timeout(self, deviceSession):
+        if len(self._devices)==0:
+            _LOGGER.error("HVAC Timed out while not in list? Maybe an issue in the underlaying library")
+            return
         _LOGGER.info("HVAC Timed-out")
         self._devices[0].timed_out = True
-        await self._devices[0].async_schedule_update_ha_state()
+        self._devices[0].async_schedule_update_ha_state()
 
     @asyncio.coroutine
     async def on_hvac_data(self, deviceSession, newstate):
@@ -191,13 +196,17 @@ class EkonLocalClimate(ClimateEntity):
         self._current_state = state
         self._session = deviceSession
         self.timed_out = False
+        self._added_to_hass = False
 
     BLHA = 0
     async def update_state(self, newstate):
-        _LOGGER.debug("EkonLocalClimate-update_state")
+        if self.timed_out:
+            _LOGGER.error("EkonLocalClimate.update_state EkonLocalClimate-update_state while device is timed-out!")
+            return
+        _LOGGER.debug("EkonLocalClimate.update_state")
         self._current_state = newstate
-        EkonLocalClimate.BLHA += 1
-        if EkonLocalClimate.BLHA > 1:
+
+        if self._added_to_hass:
             self.async_schedule_update_ha_state()
 
     @property
@@ -308,4 +317,5 @@ class EkonLocalClimate(ClimateEntity):
     @asyncio.coroutine
     def async_added_to_hass(self):
         _LOGGER.info('Ekon-local climate device added to hass()')
+        self._added_to_hass = True
 
