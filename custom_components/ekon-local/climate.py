@@ -12,6 +12,7 @@ import binascii
 import os.path
 import voluptuous as vol
 import threading
+import requests
 import pyekonlib
 import pyekonlib.Server
 import copy
@@ -105,6 +106,20 @@ EKON_VALUE_FAN_LOW = 1
 EKON_VALUE_FAN_MEDIUM = 2
 EKON_VALUE_FAN_HIGH = 3
 
+class EkonMigrationContext():
+    def __init__(self, dev_addr, udp_server_ip, udp_server_port):
+        self._dev_addr=dev_addr
+        self._udp_server_ip=udp_server_ip
+        self._udp_server_port=udp_server_port
+    def migrate(self):
+        try:
+            return pyekonlib.Migration.SetDeviceUDPServer(self._dev_addr, self._udp_server_ip, self._udp_server_port)
+        except requests.exceptions.RequestException as e:
+            _LOGGER.error("Error in migration")
+            _LOGGER.error(str(e))
+            return False
+
+
 @asyncio.coroutine
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     _LOGGER.info('Setting up Ekon-local climate platform')
@@ -117,8 +132,10 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     dev_addr = config.get(CONF_DEVICE_ADDR)
     udp_server_ip = config.get(CONF_UDP_SERVER_ADDR)
     udp_server_port = config.get(CONF_UDP_SERVER_PORT)
+
     if dev_addr is not None and dev_addr!='':
-        _LOGGER.info ("Migrated Ekon device")
+        _LOGGER.info ("Migrating Ekon device")
+        context = EkonMigrationContext(dev_addr, udp_server_ip, udp_server_port)
         result = await hass.async_add_executor_job(context.migrate)
         if result:
             _LOGGER.info ("Migrated Ekon device %s to server %s:%d" % (dev_addr,udp_server_ip,udp_server_port))
