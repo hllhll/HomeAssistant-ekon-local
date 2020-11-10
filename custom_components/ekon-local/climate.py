@@ -12,7 +12,7 @@ import binascii
 import os.path
 import voluptuous as vol
 import threading
-import requests
+import socket
 import pyekonlib
 import pyekonlib.Server
 import copy
@@ -114,11 +114,9 @@ class EkonMigrationContext():
     def migrate(self):
         try:
             return pyekonlib.Migration.SetDeviceUDPServer(self._dev_addr, self._udp_server_ip, self._udp_server_port)
-        except requests.exceptions.RequestException as e:
-            _LOGGER.error("Error in migration")
-            _LOGGER.error(str(e))
+        except socket.error as e:
+            _LOGGER.error("Error in migration " + str(e))
             return False
-
 
 @asyncio.coroutine
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
