@@ -1,7 +1,7 @@
-# NOTE: AUTO-CONFIGURATION Currently seem to not work, make the [manual method](https://github.com/hllhll/pyekonlib/blob/master/README.md#configuring-the-device)
+# ~~NOTE: AUTO-CONFIGURATION Currently seem to not work, make the [manual method](https://github.com/hllhll/pyekonlib/blob/master/README.md#configuring-the-device)~~ Autoconfig now works!
 # This is the "local-server" varient of the [Cloud-based Ekon HA integration](https://github.com/hllhll/HomeAssistant-EKON-iAircon)
 *Library will auto-onstall, but [PLEASE READ THE LIBRARY README](https://github.com/hllhll/pyekonlib).*
-
+ 
 # This is not fully tested, no responsibility whatsoever - READ Fully before installing
 Using this component may effect your hass installation stability, may report falsly the state of your HVAC, commands may seem to be working but they might not (such situation where u think you turned off the ac, but it didn't)
 
@@ -51,9 +51,8 @@ Note that configuration or auto-configuration need to only work once, so if the 
    ```
    - Configure `name` as your liking
    - `udp_server_port` is a UDP port you need to make sure that the device can talk with HA, bidirectional. - Can be any valid port number
-   - *`udp_server_addr` - Optional, for auto-configure method, the ip address of your HA host.
-   - *`device_addr` - Optional, for auto-configure method, the ip address of the EKON Device.
-   - \* As said above, auto-configuration seem to fail, currently TBD.
+   - `udp_server_addr` - Optional, for auto-configure method, the ip address of your HA host.
+   - `device_addr` - Optional, for auto-configure method, the ip address of the EKON Device.
 3. If you would like to keep working with the app, you would need the server details of the server for the proper application you are using, [see here for](https://github.com/hllhll/HomeAssistant-EKON-iAircon/issues/19#issuecomment-713386325) a list of ip addresses and ports for the original apps-udp server. \
   Add this to the `climate ekon-local` configuration entry (Same ident, just below)
     ```yaml
