@@ -224,6 +224,10 @@ class EkonLocalClimate(ClimateEntity):
             self.async_schedule_update_ha_state()
 
     @property
+    def unique_id(self):
+        return str(self._session.device.deviceData)
+
+    @property
     def available(self):
         return not self.timed_out
 
