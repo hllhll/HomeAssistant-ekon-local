@@ -158,7 +158,10 @@ class HAEkonLocalClimateController():
             self._forward = ((f_ip, f_port))
 
         _LOGGER.info("HAEkonLocalClimateController - Creating UDP Server")
-        self._server = pyekonlib.Server.UDPServer(self._udp_port, None, self.on_hvac_connected, self.on_hvac_timeout, self.on_hvac_data, self.my_call_later, self.hass.async_create_task, self._forward )
+        self._server = pyekonlib.Server.UDPServer(self._udp_port, None, self.on_hvac_connected, self.on_hvac_timeout, self.on_hvac_data, self.my_call_later, self.my_create_async_task, self._forward )
+
+    def my_create_async_task(self, corutine):
+        return asyncio.run_coroutine_threadsafe( corutine , self.hass.loop )
 
     def my_call_later(self, time, fn):
         self.hass.helpers.event.async_call_later(time, fn)
