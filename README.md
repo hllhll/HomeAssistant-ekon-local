@@ -1,4 +1,3 @@
-# ~~NOTE: AUTO-CONFIGURATION Currently seem to not work, make the [manual method](https://github.com/hllhll/pyekonlib/blob/master/README.md#configuring-the-device)~~ Autoconfig now works!
 # This is the "local-server" varient of the [Cloud-based Ekon HA integration](https://github.com/hllhll/HomeAssistant-EKON-iAircon)
 *Library will auto-onstall, but [PLEASE READ THE LIBRARY README](https://github.com/hllhll/pyekonlib).*
  
@@ -23,12 +22,12 @@ EKON iAircon / Tadiran climate component written in Python3 for Home Assistant.
 Built as a result of research into the Ekon apps and device communication with the server
 
 ## Features
-- Currently, only supports ONE CONCURRENT DEVICE 
+- Currently, only supports one concurrent device
 - Local control of your HVAC, even without internet
 - No flashing/burning of the device needed
 - The device will communicate with a server that would setup on you're HA installation
-- (Expirimental) Auto-configuration of the device to communicate with the HA server
-- Optioanl - keep using your cloud-based app! :D - See configuration
+- Auto-configuration of the device to communicate with the HA server
+- Optional - keep using your cloud-based app! :D - See configuration
 
 ## How it works
 ekon-local integration would run a UDP server on your HA host. You would have to configure
@@ -68,8 +67,7 @@ Note that configuration or auto-configuration need to only work once, so if the 
        custom_components.ekon-local: debug
    ```
 ## Known issues:
-- Currently, only supports ONE CONCURRENT DEVICE 
-- See all [known issues in the pyekonlib](https://github.com/hllhll/pyekonlib/blob/master/README.md)
+- See `issues` under this repo, [known issues in the pyekonlib](https://github.com/hllhll/pyekonlib/blob/master/README.md) and issues under pyekonlib
 
 
 ## Troubleshooting (old, maybe usefull)
