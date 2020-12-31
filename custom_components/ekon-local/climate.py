@@ -203,6 +203,11 @@ class HAEkonLocalClimateController():
         _LOGGER.debug("Sending new state from HA to pyekonlib")
         await self._server.sendNewState(newState)
 
+    async def turn_off(self, session):
+        _LOGGER.debug("Turning off HVAC")
+        await self._server.turnOff()
+
+
 
 class EkonLocalClimate(ClimateEntity):
     def __init__(self, controller, hass , state, name, deviceSession):
@@ -330,10 +335,11 @@ class EkonLocalClimate(ClimateEntity):
         
         if hvac_mode == HVAC_MODE_OFF:
             newState.onoff = False
+            await self._controller.turn_off(self._session)
         else:
             newState.onoff = True  # Make sure it's on
             newState.mode = MAP_MODE_HASS_TO_EKONLIB[hvac_mode]
-        await self._controller.apply_new_state(self._session, newState)
+            await self._controller.apply_new_state(self._session, newState)
 
     @asyncio.coroutine
     def async_added_to_hass(self):
