@@ -118,7 +118,6 @@ class EkonMigrationContext():
             _LOGGER.error("Error in migration " + str(e))
             return False
 
-@asyncio.coroutine
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     _LOGGER.info('Setting up Ekon-local climate platform')
 
@@ -158,8 +157,17 @@ class HAEkonLocalClimateController():
             self._forward = ((f_ip, f_port))
 
         _LOGGER.info("HAEkonLocalClimateController - Creating UDP Server")
-        self._server = pyekonlib.Server.UDPServer(self._udp_port, None, self.on_hvac_connected, self.on_hvac_timeout, self.on_hvac_data, self.my_call_later, self.my_create_async_task, self._forward )
+        self._server = pyekonlib.Server.UDPServer(
+            self._udp_port, None,
+            self.on_hvac_connected,
+            self.on_hvac_timeout,
+            self.on_hvac_data,
+            self.my_call_later,
+            self.my_create_async_task, # From thread context
+            self.hass.async_create_task, # From event loop/async context
+            self._forward )
 
+    # Create async task from a thread context
     def my_create_async_task(self, corutine):
         return asyncio.run_coroutine_threadsafe( corutine , self.hass.loop )
 
@@ -171,7 +179,6 @@ class HAEkonLocalClimateController():
         await self._server.start()
         _LOGGER.info('UDP Server started')
 
-    @asyncio.coroutine
     async def on_hvac_connected(self, deviceSession, hvacState):
         if len(self._devices)==0:
             _LOGGER.info("Ekon device connected")
@@ -184,7 +191,6 @@ class HAEkonLocalClimateController():
             self._devices[0].timed_out = False
             self._devices[0].async_schedule_update_ha_state()
 
-    @asyncio.coroutine
     async def on_hvac_timeout(self, deviceSession):
         if len(self._devices)==0:
             _LOGGER.error("HVAC Timed out while not in list? Maybe an issue in the underlaying library")
@@ -193,7 +199,6 @@ class HAEkonLocalClimateController():
         self._devices[0].timed_out = True
         self._devices[0].async_schedule_update_ha_state()
 
-    @asyncio.coroutine
     async def on_hvac_data(self, deviceSession, newstate):
         _LOGGER.debug("Ekon HVAC data recived - Scheduling update")
         await self._devices[0].update_state(newstate)
@@ -341,8 +346,7 @@ class EkonLocalClimate(ClimateEntity):
             newState.mode = MAP_MODE_HASS_TO_EKONLIB[hvac_mode]
             await self._controller.apply_new_state(self._session, newState)
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         _LOGGER.info('Ekon-local climate device added to hass()')
         self._added_to_hass = True
 
