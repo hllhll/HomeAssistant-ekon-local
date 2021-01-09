@@ -4,5 +4,5 @@
   "documentation": "https://github.com/hllhll/HomeAssistant-ekon-local",
   "dependencies": [],
   "codeowners": ["@hllhll"],
-  "requirements": ["pyekonlib-0.3"]
+  "requirements": ["pyekonlib==0.3"]
 }
