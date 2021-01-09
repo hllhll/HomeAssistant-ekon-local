@@ -1,10 +1,11 @@
-# This is the "local-server" varient of the [Cloud-based Ekon HA integration](https://github.com/hllhll/HomeAssistant-EKON-iAircon)
-*Library will auto-onstall, but [PLEASE READ THE LIBRARY README](https://github.com/hllhll/pyekonlib).*
+# Control Ekon/iAircon within the local LAN without requiring cloud service.
+## Code seperated into [pyekonlib](https://github.com/hllhll/pyekonlib). and this integration
+*Library will auto-onstall*, but [please read the library README](https://github.com/hllhll/pyekonlib).
  
-# This is not fully tested, no responsibility whatsoever - READ Fully before installing
+# General warnings - READ Fully before installing
 Using this component may effect your hass installation stability, may report falsly the state of your HVAC, commands may seem to be working but they might not (such situation where u think you turned off the ac, but it didn't)
 
-IT WORKS ON THE BASIS OF Blocking the original app, and currently intedended for intermidary-level users as it's in beta
+*This integration basically *BLOCKS* communication with the cloud server*, with an option to enable "forwarding" messages onto the cloud in order to keep working also with the app
 
 # What types of HVACs? / ACs?
 Short: Tadiran mini-central ACs, other iAircon/EKON/Airconet Based ACs
@@ -26,12 +27,12 @@ Built as a result of research into the Ekon apps and device communication with t
 - Local control of your HVAC, even without internet
 - No flashing/burning of the device needed
 - The device will communicate with a server that would setup on you're HA installation
-- Auto-configuration of the device to communicate with the HA server
+- Auto-configuration of the device to communicate with the HA server; This is required to be performed only once.
 - Optional - keep using your cloud-based app! :D - See configuration
 
 ## How it works
-ekon-local integration would run a UDP server on your HA host. You would have to configure
-the device to communicate with this server, instead of the genuine one (Either Airconet/Tadiran connect or Airconet+). Works on the basis of [pyekonlib](https://github.com/hllhll/pyekonlib)
+ekon-local integration would run a UDP server on your HA host. You would have to tell the integration to configure
+the device to communicate with this server, instead of the genuine one (Either Airconet/Tadiran connect or Airconet+). or do it yourselfs. see [pyekonlib](https://github.com/hllhll/pyekonlib) for that
 
 
 ## Custom Component Installation
@@ -67,7 +68,7 @@ Note that configuration or auto-configuration need to only work once, so if the 
        custom_components.ekon-local: debug
    ```
 ## Known issues:
-- See `issues` under this repo, [known issues in the pyekonlib](https://github.com/hllhll/pyekonlib/blob/master/README.md) and issues under pyekonlib
+- [See `issues` under this repo](https://github.com/hllhll/HomeAssistant-ekon-local/issues), [known issues in the pyekonlib](https://github.com/hllhll/pyekonlib/blob/master/README.md) and [issues under pyekonlib](https://github.com/hllhll/pyekonlib/issues)
 
 
 ## Troubleshooting (old, maybe usefull)
