@@ -157,14 +157,14 @@ class HAEkonLocalClimateController():
             self._forward = ((f_ip, f_port))
 
         _LOGGER.info("HAEkonLocalClimateController - Creating UDP Server")
-        self._server = pyekonlib.Server.UDPServer(
+        self._server = pyekonlib.Server.UDPServerLoopIndependent(
             self._udp_port, None,
             self.on_hvac_connected,
             self.on_hvac_timeout,
             self.on_hvac_data,
-            self.my_call_later,
-            self.my_create_async_task, # From thread context
-            self.hass.async_create_task, # From event loop/async context
+            #self.my_call_later,
+            #self.my_create_async_task, # From thread context
+            #self.hass.async_create_task, # From event loop/async context
             self._forward )
 
     # Create async task from a thread context
@@ -212,6 +212,9 @@ class HAEkonLocalClimateController():
         _LOGGER.debug("Turning off HVAC")
         await self._server.turnOff()
 
+    async def turn_on(self, session):
+        _LOGGER.debug("Turning on HVAC")
+        await self._server.turnOn()
 
 
 class EkonLocalClimate(ClimateEntity):
@@ -345,6 +348,12 @@ class EkonLocalClimate(ClimateEntity):
             newState.onoff = True  # Make sure it's on
             newState.mode = MAP_MODE_HASS_TO_EKONLIB[hvac_mode]
             await self._controller.apply_new_state(self._session, newState)
+
+    async def async_turn_on(self):
+        await self._controller.turn_on(self._session)
+
+    async def async_turn_off(self):
+        await self._controller.turn_off(self._session)
 
     async def async_added_to_hass(self):
         _LOGGER.info('Ekon-local climate device added to hass()')
