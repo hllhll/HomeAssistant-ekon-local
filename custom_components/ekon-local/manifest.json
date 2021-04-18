@@ -1,6 +1,7 @@
 {
   "domain": "ekon-local",
   "name": "Ekon-local Wifi A/C Componenet",
+  "version": "1.0",
   "documentation": "https://github.com/hllhll/HomeAssistant-ekon-local",
   "dependencies": [],
   "codeowners": ["@hllhll"],
